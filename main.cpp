@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <vector>
@@ -20,8 +21,9 @@ struct Magic {
     }
 };
 
-// xxx.exe ooo.mp4
 // xxx.exe
+// xxx.exe ooo.mp4
+// xxx.exe ooo.mp4 123 456 (frame start, frame end)
 int main(int argc, char *argv[]){
     const char wnd[] = "ta hen chi yeeeeeeee";
     // const char caffeConfig[] = "./model/deploy.prototxt";
@@ -46,11 +48,20 @@ int main(int argc, char *argv[]){
     // cv::Ptr<cv::face::Facemark> facemark;
     // std::vector<std::vector<cv::Point2f>> landmarks; // [face, 68 points]
     cv::Mat chiyi;
+    bool exportGif = false;
+    char exportName[101];
+    int iExport = 0, iStart = 0, iEnd = 1000;
 
     if(argc == 1) // use webcam
         cap.open(0);
     else
         cap.open(argv[1]);
+
+    if(argc == 4){
+        exportGif = true;
+        iStart = atoi(argv[2]);
+        iEnd = atoi(argv[3]);
+    }
 
     // load model
     net = cv::dnn::readNetFromCaffe(caffeConfig, caffeWeight);
@@ -105,6 +116,13 @@ int main(int argc, char *argv[]){
         key = cv::waitKey(1);
         if(key == 27)
             break;
+
+        // export
+        if(exportGif && t >= iStart && t < iEnd){
+            sprintf(exportName, "./result/tmp%d.jpg", iExport++);
+            cv::imwrite(exportName, frame);
+        }
+        // update
         ++t;
     }
     cv::destroyAllWindows();
