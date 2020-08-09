@@ -1,5 +1,8 @@
 # henchiyi
+
 Ta hen chi yi.
+
+We use [OpenCV pretrained model](https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector) to detect faces and draw the circles. :laughing:
 
 ## Reference
 
