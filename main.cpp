@@ -24,8 +24,10 @@ struct Magic {
 // xxx.exe
 int main(int argc, char *argv[]){
     const char wnd[] = "ta hen chi yeeeeeeee";
-    const char caffeConfig[] = "./deploy.prototxt";
-    const char caffeWeight[] = "./res10_300x300_ssd_iter_140000.caffemodel";
+    // const char caffeConfig[] = "./model/deploy.prototxt";
+    const char caffeConfig[] = "./model/deploy_lowres.prototxt";
+    const char caffeWeight[] = "./model/res10_300x300_ssd_iter_140000.caffemodel";
+    const char facemarkPath[] = "./model/lbfmodel.yaml";
     const cv::Scalar red = cv::Scalar(0, 0, 255);
     const cv::Scalar green = cv::Scalar(0, 255, 0);
 
@@ -44,8 +46,6 @@ int main(int argc, char *argv[]){
     // cv::Ptr<cv::face::Facemark> facemark;
     // std::vector<std::vector<cv::Point2f>> landmarks; // [face, 68 points]
     cv::Mat chiyi;
-    std::vector<cv::Point> curr;
-    std::vector<cv::Point> prev;
 
     if(argc == 1) // use webcam
         cap.open(0);
@@ -55,11 +55,10 @@ int main(int argc, char *argv[]){
     // load model
     net = cv::dnn::readNetFromCaffe(caffeConfig, caffeWeight);
     // facemark = cv::face::createFacemarkLBF();
-    // facemark->loadModel("lbfmodel.yaml");
+    // facemark->loadModel(facemarkPath);
 
     // hen chi yi
     cv::namedWindow(wnd);
-    prev.clear()
     while(1){
         ret = cap.read(frame);
         if(frame.empty())
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]){
         frameHeight = frame.rows;
         frameWidth = frame.cols;
         // detect face
-        inputBlob = cv::dnn::blobFromImage(frame, 1., cv::Size(300, 300), cv::Scalar(104., 117., 123.), false, false);
+        inputBlob = cv::dnn::blobFromImage(frame, 1., cv::Size(300, 300), cv::Scalar(104., 117., 123.), false, false); // after resize face might become too small
         net.setInput(inputBlob, "data");
         outputBlob = net.forward("detection_out");
         detection = cv::Mat(outputBlob.size[2], outputBlob.size[3], CV_32F, outputBlob.ptr<float>()); // NHWC (1x1x200x7) -> WC (200x7)
@@ -87,7 +86,6 @@ int main(int argc, char *argv[]){
         // ret = facemark->fit(frame, faces, landmarks);
         // display
         chiyi.create(frame.rows, frame.cols, CV_8UC3);
-        curr.clear();
         for(i = 0; i < faces.size(); ++i){
             xc = faces[i].x + faces[i].width / 2;
             yc = faces[i].y + faces[i].height / 3;
